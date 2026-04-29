@@ -1,65 +1,165 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getAllPosts, getAllCategories } from "@/lib/markdown";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { BookOpen, TrendingUp, Clock } from "lucide-react";
 
 export default function Home() {
+  const posts = getAllPosts();
+  const categories = getAllCategories();
+
+  const postsByCategory = categories.reduce(
+    (acc, categoria) => {
+      acc[categoria] = posts.filter(
+        (post) => post.metadata.categoria === categoria,
+      );
+      return acc;
+    },
+    {} as Record<string, typeof posts>,
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen">
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                GetStartedHub
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Guías y tutoriales para empezar
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-XXXXXXXXXX"
+            data-ad-slot="XXXXXXXXXX"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
+        </div>
+
+        <section className="mb-12">
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <BookOpen className="w-8 h-8 mb-2 text-primary" />
+                <CardTitle>Guías Completas</CardTitle>
+                <CardDescription>
+                  Tutoriales paso a paso para dominar nuevas tecnologías
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <TrendingUp className="w-8 h-8 mb-2 text-primary" />
+                <CardTitle>Contenido Actualizado</CardTitle>
+                <CardDescription>
+                  Información relevante y actualizada constantemente
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Clock className="w-8 h-8 mb-2 text-primary" />
+                <CardTitle>Aprende Rápido</CardTitle>
+                <CardDescription>
+                  Contenido optimizado para aprender de forma eficiente
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </section>
+
+        <Separator className="my-8" />
+
+        {categories.map((categoria) => {
+          const categoryPosts = postsByCategory[categoria];
+          if (!categoryPosts || categoryPosts.length === 0) return null;
+
+          return (
+            <section key={categoria} className="mb-12">
+              <h2 className="text-2xl font-bold mb-6 capitalize">
+                {categoria.replace("-", " ")}
+              </h2>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {categoryPosts.map((post) => (
+                  <Card
+                    key={post.metadata.slug}
+                    className="hover:shadow-lg transition-shadow"
+                  >
+                    <CardHeader>
+                      <CardTitle className="line-clamp-2">
+                        {post.metadata.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-3">
+                        {post.metadata.descripcion}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Link
+                        href={`/${post.metadata.categoria}/${post.metadata.slug}`}
+                      >
+                        <Button className="w-full">Leer más</Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+
+        {posts.length === 0 && (
+          <Card className="text-center py-12">
+            <CardHeader>
+              <CardTitle>No hay contenido disponible</CardTitle>
+              <CardDescription>
+                Ejecuta{" "}
+                <code className="bg-muted px-2 py-1 rounded">
+                  npm run generate:content
+                </code>{" "}
+                para generar páginas
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
+
+        <div className="mt-8">
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-XXXXXXXXXX"
+            data-ad-slot="XXXXXXXXXX"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
+        </div>
+      </div>
+
+      <footer className="border-t mt-12">
+        <div className="container mx-auto px-4 py-6 text-center text-muted-foreground">
+          <p>
+            &copy; {new Date().getFullYear()} GetStartedHub. Todos los derechos
+            reservados.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </footer>
     </div>
   );
 }
