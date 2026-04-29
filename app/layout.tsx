@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -45,7 +48,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} antialiased`}>
+    <html
+      lang="en"
+      className={`${inter.variable} antialiased`}
+      suppressHydrationWarning
+    >
       <head>
         <Script
           async
@@ -54,8 +61,12 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className="min-h-screen bg-background font-sans text-foreground">
-        {children}
+      <body className="min-h-screen bg-background font-sans text-foreground flex flex-col">
+        <ThemeProvider defaultTheme="light" storageKey="getstartedhub-theme">
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

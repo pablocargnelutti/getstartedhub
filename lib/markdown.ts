@@ -1,8 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
 
-const postsDirectory = path.join(process.cwd(), 'content', 'posts');
+const postsDirectory = path.join(process.cwd(), "content", "posts");
 
 export interface PostMetadata {
   title: string;
@@ -11,6 +11,7 @@ export interface PostMetadata {
   fecha: string;
   descripcion: string;
   keywords: string;
+  autor?: string;
 }
 
 export interface Post {
@@ -22,9 +23,9 @@ export function getAllCategories(): string[] {
   if (!fs.existsSync(postsDirectory)) {
     return [];
   }
-  
+
   const categories = fs.readdirSync(postsDirectory);
-  return categories.filter(category => {
+  return categories.filter((category) => {
     const categoryPath = path.join(postsDirectory, category);
     return fs.statSync(categoryPath).isDirectory();
   });
@@ -34,14 +35,14 @@ export function getAllPosts(): Post[] {
   const categories = getAllCategories();
   const allPosts: Post[] = [];
 
-  categories.forEach(categoria => {
+  categories.forEach((categoria) => {
     const categoryPath = path.join(postsDirectory, categoria);
     const files = fs.readdirSync(categoryPath);
 
-    files.forEach(filename => {
-      if (filename.endsWith('.md')) {
+    files.forEach((filename) => {
+      if (filename.endsWith(".md")) {
         const filePath = path.join(categoryPath, filename);
-        const fileContents = fs.readFileSync(filePath, 'utf8');
+        const fileContents = fs.readFileSync(filePath, "utf8");
         const { data, content } = matter(fileContents);
 
         allPosts.push({
@@ -52,14 +53,16 @@ export function getAllPosts(): Post[] {
     });
   });
 
-  return allPosts.sort((a, b) => 
-    new Date(b.metadata.fecha).getTime() - new Date(a.metadata.fecha).getTime()
+  return allPosts.sort(
+    (a, b) =>
+      new Date(b.metadata.fecha).getTime() -
+      new Date(a.metadata.fecha).getTime(),
   );
 }
 
 export function getPostsByCategory(categoria: string): Post[] {
   const categoryPath = path.join(postsDirectory, categoria);
-  
+
   if (!fs.existsSync(categoryPath)) {
     return [];
   }
@@ -67,10 +70,10 @@ export function getPostsByCategory(categoria: string): Post[] {
   const files = fs.readdirSync(categoryPath);
   const posts: Post[] = [];
 
-  files.forEach(filename => {
-    if (filename.endsWith('.md')) {
+  files.forEach((filename) => {
+    if (filename.endsWith(".md")) {
       const filePath = path.join(categoryPath, filename);
-      const fileContents = fs.readFileSync(filePath, 'utf8');
+      const fileContents = fs.readFileSync(filePath, "utf8");
       const { data, content } = matter(fileContents);
 
       posts.push({
@@ -80,8 +83,10 @@ export function getPostsByCategory(categoria: string): Post[] {
     }
   });
 
-  return posts.sort((a, b) => 
-    new Date(b.metadata.fecha).getTime() - new Date(a.metadata.fecha).getTime()
+  return posts.sort(
+    (a, b) =>
+      new Date(b.metadata.fecha).getTime() -
+      new Date(a.metadata.fecha).getTime(),
   );
 }
 
@@ -92,7 +97,7 @@ export function getPostBySlug(categoria: string, slug: string): Post | null {
     return null;
   }
 
-  const fileContents = fs.readFileSync(filePath, 'utf8');
+  const fileContents = fs.readFileSync(filePath, "utf8");
   const { data, content } = matter(fileContents);
 
   return {
@@ -105,13 +110,13 @@ export function getAllSlugs(): { categoria: string; slug: string }[] {
   const categories = getAllCategories();
   const slugs: { categoria: string; slug: string }[] = [];
 
-  categories.forEach(categoria => {
+  categories.forEach((categoria) => {
     const categoryPath = path.join(postsDirectory, categoria);
     const files = fs.readdirSync(categoryPath);
 
-    files.forEach(filename => {
-      if (filename.endsWith('.md')) {
-        const slug = filename.replace(/\.md$/, '');
+    files.forEach((filename) => {
+      if (filename.endsWith(".md")) {
+        const slug = filename.replace(/\.md$/, "");
         slugs.push({ categoria, slug });
       }
     });
