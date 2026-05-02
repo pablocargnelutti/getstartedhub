@@ -1,5 +1,7 @@
+"use client";
+
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { getAllPosts, getAllCategories } from "@/lib/markdown";
 import {
   Card,
   CardContent,
@@ -10,15 +12,45 @@ import {
 import { Button } from "@/components/ui/button";
 import { Clock, ArrowRight, Search } from "lucide-react";
 import { AdSlot } from "@/components/ad-slot";
-
-export const metadata = {
-  title: "Blog - All Articles",
-  description: "Browse all our guides, tutorials, and articles to help you get started with new skills and technologies.",
-};
+import type { Post } from "@/lib/markdown";
 
 export default function BlogPage() {
-  const posts = getAllPosts();
-  const categories = getAllCategories();
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/posts-data.json")
+      .then((res) => res.json())
+      .then((data) => {
+        setAllPosts(data.posts);
+        setCategories(data.categories);
+      });
+  }, []);
+
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const filteredPosts = useMemo(() => {
+    let filtered = allPosts;
+
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(
+        (post) => post.metadata.categoria === selectedCategory,
+      );
+    }
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (post) =>
+          post.metadata.title.toLowerCase().includes(query) ||
+          post.metadata.descripcion.toLowerCase().includes(query) ||
+          post.metadata.keywords.toLowerCase().includes(query),
+      );
+    }
+
+    return filtered;
+  }, [allPosts, selectedCategory, searchQuery]);
 
   return (
     <div className="min-h-screen">
@@ -36,6 +68,8 @@ export default function BlogPage() {
               <input
                 type="search"
                 placeholder="Search articles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-14 w-full rounded-lg border border-input bg-background pl-12 pr-4 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
@@ -47,18 +81,27 @@ export default function BlogPage() {
 
       <section className="container mx-auto px-4 py-12">
         <div className="mb-8 flex flex-wrap gap-2">
-          <Button variant="default" size="sm">
+          <Button
+            variant={selectedCategory === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedCategory("all")}
+          >
             All
           </Button>
           {categories.map((category) => (
-            <Button key={category} variant="outline" size="sm">
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(category)}
+            >
               {category.replace("-", " ")}
             </Button>
           ))}
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post, index) => (
+          {filteredPosts.map((post, index) => (
             <article
               key={post.metadata.slug}
               className="group animate-slide-up"
@@ -74,9 +117,11 @@ export default function BlogPage() {
                     <Clock className="h-3 w-3" />
                     <span>5 min read</span>
                   </div>
-                  <CardTitle className="line-clamp-2 text-2xl group-hover:text-primary transition-colors">
-                    {post.metadata.title}
-                  </CardTitle>
+                  <Link href={`/blog/${post.metadata.slug}`}>
+                    <CardTitle className="line-clamp-2 text-2xl group-hover:text-primary transition-colors cursor-pointer">
+                      {post.metadata.title}
+                    </CardTitle>
+                  </Link>
                   <CardDescription className="line-clamp-3 text-base">
                     {post.metadata.descripcion}
                   </CardDescription>
@@ -94,12 +139,12 @@ export default function BlogPage() {
           ))}
         </div>
 
-        {posts.length === 0 && (
+        {filteredPosts.length === 0 && (
           <Card className="mx-auto max-w-2xl text-center py-12">
             <CardHeader>
-              <CardTitle className="text-2xl">No Articles Yet</CardTitle>
+              <CardTitle className="text-2xl">No Articles Found</CardTitle>
               <CardDescription className="text-base">
-                Check back soon for new content!
+                Try adjusting your search or filter criteria
               </CardDescription>
             </CardHeader>
           </Card>

@@ -1,6 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
-import { getAllPosts, getAllCategories } from "@/lib/markdown";
+import { getAllPosts, getCategoriesWithCount } from "@/lib/markdown";
 import {
   Card,
   CardContent,
@@ -21,7 +20,7 @@ import { AdSlot } from "@/components/ad-slot";
 
 export default function Home() {
   const posts = getAllPosts();
-  const categories = getAllCategories();
+  const categories = getCategoriesWithCount();
   const featuredPosts = posts.slice(0, 6);
 
   return (
@@ -48,23 +47,23 @@ export default function Home() {
               the tools, technologies, and skills that matter most in 2026.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button
-                size="lg"
-                className="text-lg bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg shadow-primary/25"
-                asChild
-              >
-                <Link href="/blog">
+              <Link href="/blog">
+                <Button
+                  size="lg"
+                  className="text-lg bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg shadow-primary/25"
+                >
                   Explore Articles <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-lg border-2 border-primary/30 hover:bg-primary/10 hover:border-primary"
-                asChild
-              >
-                <Link href="/categories">Browse Categories</Link>
-              </Button>
+                </Button>
+              </Link>
+              <Link href="/categories">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="text-lg border-2 border-primary/30 hover:bg-primary/10 hover:border-primary"
+                >
+                  Browse Categories
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -148,8 +147,13 @@ export default function Home() {
                     <Clock className="h-3 w-3" />
                     <span>5 min read</span>
                   </div>
-                  <CardTitle className="line-clamp-2 text-2xl group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-accent group-hover:bg-clip-text group-hover:text-transparent transition-all">
-                    {post.metadata.title}
+                  <CardTitle className="line-clamp-2 text-2xl">
+                    <Link
+                      href={`/blog/${post.metadata.slug}`}
+                      className="group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-accent group-hover:bg-clip-text group-hover:text-transparent transition-all"
+                    >
+                      {post.metadata.title}
+                    </Link>
                   </CardTitle>
                   <CardDescription className="line-clamp-3 text-base">
                     {post.metadata.descripcion}
@@ -199,30 +203,42 @@ export default function Home() {
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 py-16">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="container mx-auto px-4 relative">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-4xl text-center mb-12">
             <h2 className="mb-4 text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Never Miss an Update
+              Explore Popular Topics
             </h2>
-            <p className="mb-8 text-lg text-muted-foreground">
-              Get the latest guides, tutorials, and industry insights delivered
-              straight to your inbox.
+            <p className="text-lg text-muted-foreground">
+              Discover comprehensive guides across different categories to
+              accelerate your learning journey
             </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="h-12 w-full rounded-lg border-2 border-primary/20 bg-background px-4 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:w-80"
-              />
-              <Button
-                size="lg"
-                className="h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg"
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
+            {categories.slice(0, 8).map((category) => (
+              <Link
+                key={category.slug}
+                href={`/categoria/${category.slug}`}
+                className="group"
               >
-                Subscribe
-              </Button>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              Join 10,000+ learners. Unsubscribe anytime.
-            </p>
+                <Card className="h-full border-2 border-transparent transition-all hover:border-primary/40 hover:shadow-lg hover:-translate-y-1">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                      {category.name}
+                    </CardTitle>
+                    <CardDescription>
+                      {category.count}{" "}
+                      {category.count === 1 ? "article" : "articles"}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/categories">
+                View All Categories <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

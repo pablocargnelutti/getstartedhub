@@ -19,6 +19,12 @@ export interface Post {
   content: string;
 }
 
+export interface Category {
+  name: string;
+  slug: string;
+  count: number;
+}
+
 export function getAllCategories(): string[] {
   if (!fs.existsSync(postsDirectory)) {
     return [];
@@ -29,6 +35,29 @@ export function getAllCategories(): string[] {
     const categoryPath = path.join(postsDirectory, category);
     return fs.statSync(categoryPath).isDirectory();
   });
+}
+
+export function getCategoriesWithCount(): Category[] {
+  const categories = getAllCategories();
+
+  return categories
+    .map((slug) => {
+      const categoryPath = path.join(postsDirectory, slug);
+      const files = fs.readdirSync(categoryPath);
+      const count = files.filter((file) => file.endsWith(".md")).length;
+
+      const name = slug
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+
+      return {
+        name,
+        slug,
+        count,
+      };
+    })
+    .sort((a, b) => b.count - a.count);
 }
 
 export function getAllPosts(): Post[] {

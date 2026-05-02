@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Search, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { useState } from "react";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -28,25 +30,42 @@ export function Header() {
             <nav className="hidden md:flex items-center gap-6">
               <Link
                 href="/"
-                className="text-sm font-medium transition-all hover:text-primary relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-primary after:to-accent hover:after:w-full after:transition-all"
+                className={`text-sm font-medium transition-all hover:text-primary relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-gradient-to-r after:from-primary after:to-accent after:transition-all ${
+                  pathname === "/"
+                    ? "text-primary after:w-full"
+                    : "after:w-0 hover:after:w-full"
+                }`}
               >
                 Home
               </Link>
               <Link
                 href="/blog"
-                className="text-sm font-medium transition-all hover:text-primary relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-primary after:to-accent hover:after:w-full after:transition-all"
+                className={`text-sm font-medium transition-all hover:text-primary relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-gradient-to-r after:from-primary after:to-accent after:transition-all ${
+                  pathname?.startsWith("/blog")
+                    ? "text-primary after:w-full"
+                    : "after:w-0 hover:after:w-full"
+                }`}
               >
                 Blog
               </Link>
               <Link
                 href="/categories"
-                className="text-sm font-medium transition-all hover:text-primary relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-primary after:to-accent hover:after:w-full after:transition-all"
+                className={`text-sm font-medium transition-all hover:text-primary relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-gradient-to-r after:from-primary after:to-accent after:transition-all ${
+                  pathname?.startsWith("/categories") ||
+                  pathname?.startsWith("/categoria")
+                    ? "text-primary after:w-full"
+                    : "after:w-0 hover:after:w-full"
+                }`}
               >
                 Categories
               </Link>
               <Link
                 href="/about"
-                className="text-sm font-medium transition-all hover:text-primary relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-primary after:to-accent hover:after:w-full after:transition-all"
+                className={`text-sm font-medium transition-all hover:text-primary relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-gradient-to-r after:from-primary after:to-accent after:transition-all ${
+                  pathname === "/about"
+                    ? "text-primary after:w-full"
+                    : "after:w-0 hover:after:w-full"
+                }`}
               >
                 About
               </Link>
@@ -80,28 +99,41 @@ export function Header() {
             <nav className="flex flex-col gap-4">
               <Link
                 href="/"
-                className="text-sm font-medium transition-colors hover:text-primary"
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  pathname === "/" ? "text-primary font-semibold" : ""
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 href="/blog"
-                className="text-sm font-medium transition-colors hover:text-primary"
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  pathname?.startsWith("/blog")
+                    ? "text-primary font-semibold"
+                    : ""
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Blog
               </Link>
               <Link
                 href="/categories"
-                className="text-sm font-medium transition-colors hover:text-primary"
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  pathname?.startsWith("/categories") ||
+                  pathname?.startsWith("/categoria")
+                    ? "text-primary font-semibold"
+                    : ""
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Categories
               </Link>
               <Link
                 href="/about"
-                className="text-sm font-medium transition-colors hover:text-primary"
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  pathname === "/about" ? "text-primary font-semibold" : ""
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 About
