@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -15,27 +16,37 @@ import { AdSlot } from "@/components/ad-slot";
 import type { Post } from "@/lib/markdown";
 
 export default function BlogPage() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     fetch("/posts-data.json")
       .then((res) => res.json())
       .then((data) => {
-        setAllPosts(data.posts);
-        setCategories(data.categories);
+        setAllPosts(data.posts || []);
+        setCategories(data.categories || []);
+        setIsLoaded(true);
+      })
+      .catch((error) => {
+        console.error("Error loading posts:", error);
+        setIsLoaded(true);
       });
   }, []);
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const activeCategory = categoryParam || selectedCategory;
 
   const filteredPosts = useMemo(() => {
     let filtered = allPosts;
 
-    if (selectedCategory !== "all") {
+    if (activeCategory !== "all") {
       filtered = filtered.filter(
-        (post) => post.metadata.categoria === selectedCategory,
+        (post) => post.metadata.categoria === activeCategory,
       );
     }
 
@@ -50,7 +61,15 @@ export default function BlogPage() {
     }
 
     return filtered;
-  }, [allPosts, selectedCategory, searchQuery]);
+  }, [allPosts, activeCategory, searchQuery]);
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -82,7 +101,7 @@ export default function BlogPage() {
       <section className="container mx-auto px-4 py-12">
         <div className="mb-8 flex flex-wrap gap-2">
           <Button
-            variant={selectedCategory === "all" ? "default" : "outline"}
+            variant={activeCategory === "all" ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedCategory("all")}
           >
@@ -91,7 +110,7 @@ export default function BlogPage() {
           {categories.map((category) => (
             <Button
               key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
+              variant={activeCategory === category ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(category)}
             >
